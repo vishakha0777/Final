@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Midnight Surprise</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:"Poppins",sans-serif;
+      background:#000;color:#fff;height:100vh;overflow:hidden;
+    }
+
+    /* Background Music (optional; keep file as song.mp3) */
+    audio{
+      display: none;
+      
+    }
+
+    /* Starry sky (visible from start) */
+    .starry-sky{
+      position:absolute;inset:0;background:#000;z-index:1;
+    }
+    .star{
+      position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;
+      opacity:.35; /* dim at start */
+      animation:twinkle 2s infinite alternate;
+      transition: opacity 1.2s ease;
+    }
+    /* Finale makes them brighter */
+    .starry-sky.bright .star{ opacity:.85; }
+    @keyframes twinkle{from{opacity:.2}to{opacity:1}}
+
+    /* Crescent Moon (tilted) */
+    .crescent-moon{
+      position:absolute;top:7%;
+      left:75%;
+      transform: translateX(-50%) rotate(-40deg); /* 👈 tilted moon */
+      width:120px;height:120px;border-radius:50%;
+      background:#fff;box-shadow:0 0 40px rgba(255,255,200,.8);
+      overflow:hidden;z-index:2;
+    }
+    .crescent-moon::after{
+      content:"";position:absolute;top:0;left:25%;
+      width:100%;height:100%;border-radius:50%;background:#000;
+    }
+
+    /* Floating quotes */
+    .quote{
+      position:absolute;left:50%;top:65%;
+      transform:translateX(-50%);
+      font-size:1.4rem;text-align:center;opacity:0;
+      animation: floatUp 5s ease forwards;
+      z-index:3;
+    }
+    @keyframes floatUp{
+      0%{opacity:0;transform:translate(-50%,20px)}
+      20%{opacity:1}
+      80%{opacity:1}
+      100%{opacity:0;transform:translate(-50%,-200px)}
+    }
+
+    /* Transition line */
+    .transition{
+      display:none;position:absolute;inset:0;background:#000;z-index:5;
+      justify-content:center;align-items:center;text-align:center;
+    }
+    .typewriter{
+      font-size:1.2rem;letter-spacing:.05em;
+      border-right:.15em solid #fff;white-space:nowrap;overflow:hidden;
+      animation:typing 3s steps(30,end),blink .7s infinite;
+    }
+    @keyframes typing{from{width:0}to{width:100%}}
+    @keyframes blink{50%{border-color:transparent}}
+
+    /* Shooting star */
+    .shooting-star{
+      position:absolute;width:2px;height:100px;
+      background:linear-gradient(-45deg,#fff,transparent);
+      transform:rotate(45deg);opacity:.9;
+      animation:shoot 1.5s linear forwards;
+    }
+    @keyframes shoot{
+      from{transform:translate(0,0) rotate(45deg);opacity:1}
+      to{transform:translate(-500px,500px) rotate(45deg);opacity:0}
+    }
+
+    /* Finale text (stylish gradient) */
+    .final-text{
+      display:none;position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);
+      font-size:3rem;font-weight:800;text-align:center;
+      background: linear-gradient(90deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+      background-size:300% 300%;
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      animation: gradientShift 6s infinite linear, pulseGlow 3s ease-in-out infinite;
+      z-index:10;
+    }
+    @keyframes gradientShift{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+    @keyframes pulseGlow{
+      0%{text-shadow:0 0 8px #fff}
+      50%{text-shadow:0 0 25px #fff}
+      100%{text-shadow:0 0 8px #fff}
+    }
+
+    .extra-lines{
+      display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      text-align:center;font-size:1.1rem;line-height:1.8;z-index:10;
+    }
+    .photo{
+      display:none;position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
+      width:160px;border-radius:12px;
+      box-shadow:0 0 18px rgba(255,255,255,.6);z-index:10;
+    }
+    .signature{
+      display:none;position:absolute;bottom:30px;right:20px;font-style:italic;
+      font-size:1rem;color:#ffc0cb;z-index:10;
+    }
+
+    /* Floating pastel hearts */
+    .heart{
+      position:absolute;border-radius:50%;
+      animation: floatHeart 6s linear forwards;z-index:8;
+    }
+    @keyframes floatHeart{
+      from{transform:translateY(0);opacity:1}
+      to{transform:translateY(-100vh);opacity:0}
+    }
+  </style>
+</head>
+<body>
+  <!-- Music (optional) -->
+  <audio id="bgMusic" autoplay loop>
+    <source src="tereLiye.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Background (stars from start) -->
+  <div class="starry-sky" id="sky"></div>
+  <div class="crescent-moon"></div>
+
+  <!-- Transition line -->
+  <div class="transition" id="transition">
+    <div class="typewriter">Chand Sitare bhi tumhe dekh kr muskura rhe hai dekho jara😌🌜⭐</div>
+  </div>
+
+  <!-- Finale -->
+  <div class="final-text" id="finalText"> Again!!! Janamdin Mubarak Mera Chand</div>
+  <div class="extra-lines" id="extraLines">Good NIGHT 😴✨I love youu Khayal rakho apna!!</div>
+ <img src="ily.gif" class="photo" id="photo" alt="special"/>
+
+  <div class="signature" id="signature">— With love, your Vishuu💌</div>
+
+  <script>
+  window.addEventListener("click", function playMusicOnce() {
+  const audio = document.getElementById("bgMusic");
+  audio.play().catch(err => console.log("Autoplay blocked:", err));
+  window.removeEventListener("click", playMusicOnce);
+});
+    const quotes=[
+      "Tumhara hona mere liye ek Farishta hai!!🤍",
+      "Tum sab kuch deserve karte ho!!🙃",
+      "I love Youuuu more than jitna tumhe pata hai😌",
+      "Tum mere yaadon ka sabse dilnasheen hissa ho",
+      "Akhri me bass ye suno 'Tum mere liye Bahot Ahem ho Aur humesha rahoge' "
+    ];
+    let i=0;
+
+    /* Create stars IMMEDIATELY (visible from start) */
+    function createStars(){
+      const sky=document.getElementById("sky");
+      for(let j=0;j<180;j++){
+        const s=document.createElement("div");
+        s.className="star";
+        const size = 1 + Math.random()*2;
+        s.style.width = size + "px";
+        s.style.height = size + "px";
+        s.style.top=Math.random()*100+"%";
+        s.style.left=Math.random()*100+"%";
+        sky.appendChild(s);
+      }
+    }
+
+    function showQuotes(){
+      if(i<quotes.length){
+        const q=document.createElement("div");
+        q.className="quote";
+        q.textContent=quotes[i];
+        document.body.appendChild(q);
+        setTimeout(()=>q.remove(),5000);
+        i++;
+        setTimeout(showQuotes,3500);
+      } else {
+        setTimeout(startTransition,2000);
+      }
+    }
+
+    function startTransition(){
+      document.getElementById("transition").style.display="flex";
+      setTimeout(()=>{
+        document.getElementById("transition").style.display="none";
+        startFinale();
+      },5200);
+    }
+
+    function startFinale(){
+      const sky=document.getElementById("sky");
+      /* Brighten existing stars for climax */
+      sky.classList.add("bright");
+
+      /* Shooting stars */
+      const shootTimer = setInterval(()=>{
+        const sh=document.createElement("div");
+        sh.className="shooting-star";
+        sh.style.top=(Math.random()*40)+"%";
+        sh.style.left=(20+Math.random()*60)+"%";
+        sh.style.animationDuration=(1+Math.random()*1.5)+"s";
+        sky.appendChild(sh);
+        setTimeout(()=>sh.remove(),2200);
+      },2400);
+
+      /* Hearts */
+      const heartTimer = setInterval(()=>{
+        const h=document.createElement("div");
+        h.className="heart";
+        h.style.left=Math.random()*100+"vw";
+        h.style.width=h.style.height=(14+Math.random()*20)+"px";
+        h.style.background="hsla("+(300+Math.random()*60)+",80%,75%,0.7)";
+        document.body.appendChild(h);
+        setTimeout(()=>h.remove(),6000);
+      },1200);
+
+      /* Finale contents */
+      setTimeout(()=>document.getElementById("finalText").style.display="block",2050);
+      setTimeout(()=>document.getElementById("extraLines").style.display="block",4050);
+      setTimeout(()=>document.getElementById("photo").style.display="block",5000);
+      setTimeout(()=>document.getElementById("signature").style.display="block",6700);
+
+      /* Optional: stop effects later to save battery */
+      setTimeout(()=>{
+        clearInterval(shootTimer);
+        clearInterval(heartTimer);
+      },25000);
+    }
+    
+
+    window.onload = ()=>{
+      createStars();          // ⭐ stars from start
+      setTimeout(showQuotes, 1200); // float quotes
+    };
+  </script>
+</body>
+</html>
